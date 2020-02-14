@@ -1,3 +1,8 @@
+**Tutorial:** Extending Loop Transformation Frameworks to Irregular Applications
+**Location:** PPoPP’20 tutorial, San Diego, CA
+**Date:** Sunday February 23, 2020 from 1pm PT to 5pm PT
+**Agenda link:** <https://ppopp20.sigplan.org/program/program-PPoPP-2020?date=Sun%2023%20Feb%202020>
+
 Loop transformation frameworks such as the polyhedral model enable expressing complex loop
 nests and composing transformations on such loop nests. The transformations enable
 parallelism and improve data locality by modifying the schedule of the loop and in some cases
