@@ -15,4 +15,5 @@ filename: materials.md
 5. [Piecewise Regular Code Generation](5-pldi2019-piecewise-regular-codegen.pdf)
     * [Fold Points To Polyhedra](5-iscc-fold-points-to-polyhedra.iscc)
 6. [Polyhedral Scheduling and Transformation](6-polyhedral-scheduling-and-transformations.pdf)
-7. [The Sparce Polyhedral Framework](spf-intro.pdf)
+7. [The Sparse Polyhedral Framework](spf-intro.pdf)
+8. [Handling Recursive Functions: Polyrec](https://cs.colostate.edu/~pouchet/milind/polyrec.pdf)
