@@ -4,6 +4,8 @@
 
 **Date:** Sunday February 23, 2020 from 1pm PT to 5pm PT [(link to agenda)](https://ppopp20.sigplan.org/program/program-PPoPP-2020?date=Sun%2023%20Feb%202020)
 
+[**Materials**](materials.md)
+
 Loop transformation frameworks such as the polyhedral model enable expressing complex loop
 nests and composing transformations on such loop nests. The transformations enable
 parallelism and improve data locality by modifying the schedule of the loop and in some cases
