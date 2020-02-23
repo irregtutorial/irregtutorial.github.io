@@ -1,0 +1,96 @@
+### We are modeling the non-zero coordinates that corresponds to this code:
+#for (j = 2; j <= 5; j++)
+#   y[1] += csr_data[j-2] * x[j];
+#y[3] += csr_data[4] * x[4];
+#y[4] += csr_data[5] * x[2];
+#
+#
+# The macro for the statement is #define S(i,j,k) y[(i)] += csr_data[(k)] * x[(j)]
+#
+
+## First we create the 6 individual points, that come from tracing the code:
+p1 := { S[i,j,csrdata] : i = 1 and j = 2 and csrdata = 0 };
+p1;
+p2 := { S[1,3,1] };
+p3 := { S[1,4,2] };
+p4 := { S[1,5,3] };
+p5 := { S[3,4,4] };
+p6 := { S[4,2,5] };
+p1; p2; p3; p4; p5; p6;
+
+## If we generate code for each point, we obtain a set of individual statements.
+codegen p1;
+codegen p2;
+codegen p3;
+codegen p4;
+codegen p5;
+codegen p6;
+
+## We can however create a union of the first 2 polyhedra, coalescing for simplification:
+p12 := coalesce(p1+p2);
+p12;
+codegen p12;
+
+## A loop is now formed that iterates on these 2 points! But loops may not always be usefully created:
+p56 := coalesce(p5+p6);
+p56;
+codegen p56;
+
+
+## In this simplistic example, we can form the union of all points, to obtain roughly the code above:
+p := coalesce(p1+p2+p3+p4+p5+p6);
+p;
+codegen p;
+
+## It is possible to build the unions incrementally:
+p := p1;
+p := coalesce(p+p2);
+p;
+p := coalesce(p+p3);
+p;
+p := coalesce(p+p4);
+p;
+
+## Handling strides mean finding a lattice that models them. Let's now use csr_data with real addresses for float scalars in the array, with an offset &(A[0]) = 1024:
+
+p1 := { S[i,j,csrdata] : i = 1 and j = 2 and csrdata = 1024 };
+p2 := { S[1,3,1028] };
+p3 := { S[1,4,1032] };
+p4 := { S[1,5,1036] };
+p5 := { S[3,4,1040] };
+p6 := { S[4,2,1044] };
+
+p1; p2; p3; p4; p5; p6;
+## We try to coalesce them again, but this time 'coalesce' is not sufficient:
+p := p1;
+p := coalesce(p+p2);
+p;
+p := coalesce(p+p3);
+p;
+
+## However these points can be modeled using a lattice to capture the offset. This lattice is typically found by mining the data and observe regularity in the series for csrdata.
+p1 := { S[i,j,csrdata] : i = 1 and j = 2 and csrdata = 1024 + 4*(j-2) };
+p2 := { S[1,j,csrdata] : j = 3 and csrdata = 1024 + 4*(j-2)};
+p3 := { S[1,j,csrdata] : j = 4 and csrdata = 1024 + 4*(j-2)};
+p4 := { S[1,5,1036] };
+p5 := { S[3,4,1040] };
+p6 := { S[4,2,1044] };
+
+## It still refuses to coalesce the points, because we enter limitations of the coalescing in iscc (and hence why we needed to develop new approaches for this problem). 
+p := p1;
+p := coalesce(p+p2);
+p;
+p := coalesce(p+p3);
+p;
+
+## We can "emulate" the process by making iscc focus only on the i,j dimension, and plug the lattice afterwards.
+p1 := { S[1,2] };
+p2 := { S[1,3] };
+p3 := { S[1,4] };
+
+p := coalesce(p1+p2+p3);
+p;
+lattice := { S[i,j] -> S[i,j,csr_data] : csr_data = 1024 + 4*(j-2) };
+final_p := lattice(p);
+final_p;
+codegen (final_p);

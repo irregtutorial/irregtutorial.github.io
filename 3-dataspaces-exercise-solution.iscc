@@ -1,0 +1,247 @@
+#for (t = 0; t < TimeSteps; ++t) {
+#  for (i1 = 1; i1 < N-1; ++i1)
+#    for (j1 = 1; j1 < N-1; ++j1)
+#R:    B[i1][j1] = 0.2 * (A[i1][j1-1] + A[i1][j1] + A[i1][j1+1] + A[i1+1][j1] + #A[i1-1][j1]);
+#  for (i2 = 1; i2 < N-1; ++i2)
+#    for (j2 = 1; j2 < N-1; ++j2)
+#S:    A[i2][j2] = 0.2 * (B[i2][j2-1] + B[i2][j2] + B[i2][j2+1] + B[i2+1][j2] + #B[i2-1][j2]);
+#}
+
+## We start by building the polyhedral representation of the program, prior to answering any question.
+## Adding all parameters I will need for the entire assignment from the start, to avoid re-declaring with extended parameter list later. Ditto for access functions.
+
+## Iteration domains of R and S:
+D_R := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] : 0 <= t < TimeSteps and 1 <= i1, j1 < N - 1 };
+
+D_S := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] : 0 <= t < TimeSteps and 1 <= i2, j2 < N - 1 };
+
+## Access functions.
+F_R_Read_A_ijm1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> A[i1,j1-1] };
+F_R_Read_A_ij   := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> A[i1,j1]   };
+F_R_Read_A_ijp1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> A[i1,j1+1] };
+F_R_Read_A_ip1j := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> A[i1+1,j1] };
+F_R_Read_A_im1j := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> A[i1-1,j1] };
+
+F_R_Write_B_ij := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] -> B[i1,j1]    };
+
+F_S_Read_B_ijm1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> B[i2,j2-1] };
+F_S_Read_B_ij   := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> B[i2,j2]   };
+F_S_Read_B_ijp1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> B[i2,j2+1] };
+F_S_Read_B_ip1j := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> B[i2+1,j2] };
+F_S_Read_B_im1j := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> B[i2-1,j2] };
+
+F_S_Write_A_ij := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i2,j2] -> A[i2,j2]    };
+
+## F_R_A is the union of access functions to array A in statement R.
+
+F_R_A := F_R_Read_A_ijm1 + F_R_Read_A_ij + F_R_Read_A_ijp1 + F_R_Read_A_ip1j + F_R_Read_A_im1j;
+F_S_A := F_S_Write_A_ij;
+
+F_R_B := F_R_Write_B_ij;
+
+F_S_B := F_S_Read_B_ijm1 + F_S_Read_B_ij + F_S_Read_B_ijp1 + F_S_Read_B_ip1j + F_S_Read_B_im1j;
+
+
+print "==============================================================";
+print "==============================================================";
+print "Question 1:";
+print "Iteration domain of R:";
+D_R;
+print "Iteration domain of S:";
+D_S;
+print "Size of iteration domain of R:";
+card D_R;
+print "Size of iteration domain of S:";
+card D_S;
+
+print "==============================================================";
+print "Question 2:";
+print "12 access functions:";
+F_R_Read_A_ijm1;
+F_R_Read_A_ij;
+F_R_Read_A_ijp1;
+F_R_Read_A_ip1j;
+F_R_Read_A_im1j;
+F_R_Write_B_ij;
+F_S_Read_B_ijm1;
+F_S_Read_B_ij;
+F_S_Read_B_ijp1;
+F_S_Read_B_ip1j;
+F_S_Read_B_im1j;
+F_S_Write_A_ij;
+
+
+print "==============================================================";
+print "Question 3:";
+
+F_A := F_R_A + F_S_A;
+print "Union of access functions on A:";
+F_A;
+
+
+print "==============================================================";
+print "Question 4:";
+
+F_B := F_R_B + F_S_B;
+print "Union of access functions on B:";
+F_B;
+
+print "==============================================================";
+print "Question 5:";
+
+DS_A := F_R_A(D_R) + F_S_A(D_S);
+print "Data space of A:";
+DS_A;
+
+
+print "==============================================================";
+print "Question 6:";
+
+DS_B := F_R_B(D_R) + F_S_B(D_S);
+print "Data space of B:";
+DS_B;
+
+
+print "==============================================================";
+print "Question 7:";
+print "Number of points in the data space of A:";
+card DS_A;
+print "Number of points in the data space of B:";
+card DS_B;
+
+
+print "==============================================================";
+print "Question 8:";
+print "Sum of the number of points in D_R and D_S:";
+s := D_R + D_S;
+card s;
+
+
+print "==============================================================";
+print "Question 9:";
+
+SliceARij := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i,j] -> A[I1,J1] };
+SliceASij := [TimeSteps,N,T,I1,J1,I2,J2] -> { S[t,i,j] -> A[I1,J1] };
+IterToCell_R_A := (F_R_A * D_R) * SliceARij;
+IterToCell_S_A := (F_S_A * D_S) * SliceASij;
+IterToCell_A := IterToCell_R_A + IterToCell_S_A;
+print "Number of times a cell of A is accessed:";
+card (domain IterToCell_A);
+## Alternatively, all in one formula:
+SliceAij := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i,j] -> A[I1,J1];  S[t,i,j] -> A[I1,J1] };
+IterToCell_A := ((F_R_A * D_R) + (F_S_A * D_S)) * SliceAij;
+
+print "==============================================================";
+print "Question 10:";
+
+## Build the iteration space slice.
+SliceRj1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] : t = T and i1 = I1 };
+D_R_j1 := D_R * SliceRj1;
+print "Data space of A for one execution of j1:";
+DS_R_A_j1 := F_R_A(D_R_j1);
+DS_R_A_j1;
+
+print "==============================================================";
+print "Question 11:";
+print "Code scanning DS_R_A_j1:";
+codegen DS_R_A_j1;
+
+print "==============================================================";
+print "Question 12:";
+print "Total size of DS_R_A_j1";
+card DS_R_A_j1;
+
+## Prepare two maps to isolate each dimension space.
+MapAi := [TimeSteps,N,T,I1,J1,I2,J2] -> { A[i,j] -> project[i] };
+MapAj := [TimeSteps,N,T,I1,J1,I2,J2] -> { A[i,j] -> project[j] };
+print "Size along first dimension:";
+card MapAi(DS_R_A_j1);
+print "Size along second dimension:";
+card MapAj(DS_R_A_j1);
+
+
+print "==============================================================";
+print "Question 13:";
+
+print "Data space of B for one execution of j1:";
+DS_R_B_j1 := F_R_B(D_R_j1);
+DS_R_B_j1;
+
+print "Total size of DS_R_B_j1";
+card DS_R_B_j1;
+
+## Prepare two maps to isolate each dimension space.
+MapBi := [TimeSteps,N,T,I1,J1,I2,J2] -> { B[i,j] -> project[i] };
+MapBj := [TimeSteps,N,T,I1,J1,I2,J2] -> { B[i,j] -> project[j] };
+print "Size along first dimension:";
+card MapBi(DS_R_B_j1);
+print "Size along second dimension:";
+card MapBj(DS_R_B_j1);
+
+
+
+print "==============================================================";
+print "Question 14:";
+
+
+print "Copy-in code for A, to be inserted right before the start of the j1 loop:";
+print "double A_local[3][N];";
+codegen DS_R_A_j1;
+print "Statement body: #define A(i,j)  A_local[(i)-(I1-1)][(j)-(max(-I1+c0, I1-c0))] = A[(i)][(j)];";
+
+
+print "==============================================================";
+print "Question 15:";
+
+
+print "Code for B_local, to be inserted right before the start of the j1 loop:";
+print "double B_local[N-2]";
+
+print "Copy-out code for B, to be inserted right after the end of the j1 loop:";
+codegen DS_R_B_j1;
+print "Statement body: #define B(i,j)  B[(i)][(j)+1] = B_local[(j)];";
+
+
+
+print "==============================================================";
+print "Question 16:";
+
+print "Final statement body, using A_local[][] and B_local[]";
+print "B_local[j1-1] = 0.2 * (A_local[1][j1-1] + A_local[1][j1] + A_local[1][j1+1] + A_local[2][j1] + A_local[0][j1]);";
+
+
+print "==============================================================";
+print "Question 17:";
+
+## Build an iteration space slice for the previous j1 execution.
+SliceRj1m1 := [TimeSteps,N,T,I1,J1,I2,J2] -> { R[t,i1,j1] : t = T and i1 = I1-1 };
+D_R_j1m1 := D_R * SliceRj1m1;
+print "Data space of A for one execution of j1:";
+DS_R_A_j1;
+
+print "Data space of A for the immediately previous execution of j1:";
+DS_R_A_j1m1 := F_R_A(D_R_j1m1);
+DS_R_A_j1m1;
+
+print "A data reused between two consecutive executions of j1:";
+DS_R_A_j1_reused := DS_R_A_j1 * DS_R_A_j1m1;
+DS_R_A_j1_reused;
+
+print "Data space needed to be communicated: only what is not reused";
+DS_R_A_j1_comm := DS_R_A_j1 - DS_R_A_j1_reused;
+
+print "Size for A_local in each dimension:";
+print "first dimension:";
+card MapAi(DS_R_A_j1_comm);
+print "second dimension:";
+card MapAj(DS_R_A_j1_comm);
+
+
+print "Copy-in code for A, to be inserted right before the start of the j1 loop:";
+print "double A_local[3][N];";
+codegen DS_R_A_j1_comm;
+print "Statement body: #define A(i,j)  A_local[(i)%3][(j)] = A[(i)][(j)];";
+print "Rotating rows in A_local, to be inserted right after the end of the j1 loop:";
+d := [TimeSteps,N,T,I1,J1,I2,J2] -> { X[i] :  0 <= i < N };
+codegen d;
+print "Statement body: #define X(i)  { A_local[0][(i)] = A_local[1][(i)]; A_local[1][(i)] = A_local[2][(i)]; }";
