@@ -1,6 +1,6 @@
 ---
 title: Presention Materials
-layout: jekyll-theme-cayman
+layout: page
 filename: materials.md
 --- 
 
