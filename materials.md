@@ -1,6 +1,6 @@
 ---
 title: Presention Materials
-layout: page
+layout: default
 filename: materials.md
 --- 
 
